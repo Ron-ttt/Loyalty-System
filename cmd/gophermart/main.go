@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/Ron-ttt/x2/cmd/handlers"
-
 	"github.com/gorilla/mux"
 )
 
