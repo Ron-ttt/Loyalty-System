@@ -8,17 +8,18 @@ import (
 )
 
 func Starts() start {
-	_, addressURl, dbname := config.Flags()
+	url, addressURl, dbname := config.Flags()
 	//dbname = "postgresql://postgres:190603@localhost:5432/postgres?sslmode=disable"
 
 	db, err1 := db.NewDataBase(dbname)
 	if err1 != nil {
 		panic(err1)
 	}
-	return start{addressBonus: addressURl, database: db}
+	return start{URL: url, addressBonus: addressURl, database: db}
 }
 
 type start struct {
+	URL          string
 	addressBonus string
 	database     *sql.DB
 }
