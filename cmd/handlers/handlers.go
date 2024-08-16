@@ -1,35 +1,54 @@
 package handlers
 
-import "net/http"
+import (
+	"database/sql"
+	"net/http"
+	"x2/cmd/config"
+	"x2/cmd/db"
+)
 
-func Register(res http.ResponseWriter, req *http.Request) {
+func Starts() start {
+	_, addressURl, dbname := config.Flags()
+	db, err1 := db.NewDataBase(dbname)
+	if err1 != nil {
+		panic(err1)
+	}
+	return start{addressBonus: addressURl, database: db}
+}
+
+type start struct {
+	addressBonus string
+	database     *sql.DB
+}
+
+func (st start) Register(res http.ResponseWriter, req *http.Request) {
 
 }
 
-func Login(res http.ResponseWriter, req *http.Request) {
+func (st start) Login(res http.ResponseWriter, req *http.Request) {
 
 }
 
-func UpOrder(res http.ResponseWriter, req *http.Request) {
+func (st start) UpOrder(res http.ResponseWriter, req *http.Request) {
 
 }
 
-func GetOrder(res http.ResponseWriter, req *http.Request) {
+func (st start) GetOrder(res http.ResponseWriter, req *http.Request) {
 
 }
 
-func Balance(res http.ResponseWriter, req *http.Request) {
+func (st start) Balance(res http.ResponseWriter, req *http.Request) {
 
 }
 
-func LossBonus(res http.ResponseWriter, req *http.Request) {
+func (st start) LossBonus(res http.ResponseWriter, req *http.Request) {
 
 }
 
-func Info(res http.ResponseWriter, req *http.Request) {
+func (st start) Info(res http.ResponseWriter, req *http.Request) {
 
 }
 
-func InfoBonus(res http.ResponseWriter, req *http.Request) {
+func (st start) InfoBonus(res http.ResponseWriter, req *http.Request) {
 
 }
