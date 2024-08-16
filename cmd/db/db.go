@@ -23,7 +23,7 @@ func NewDataBase(dbname string) (*sql.DB, error) {
 		return nil, err
 	}
 	m, err := migrate.NewWithDatabaseInstance(
-		"x2/cmd/migrations",
+		"file://./../migrations",
 		"postgres", driver)
 	if err != nil {
 		fmt.Println("3", err)

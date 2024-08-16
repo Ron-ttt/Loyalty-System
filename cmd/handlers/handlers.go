@@ -9,6 +9,8 @@ import (
 
 func Starts() start {
 	_, addressURl, dbname := config.Flags()
+	dbname = "postgresql://postgres:190603@localhost:5432/postgres?sslmode=disable"
+
 	db, err1 := db.NewDataBase(dbname)
 	if err1 != nil {
 		panic(err1)
