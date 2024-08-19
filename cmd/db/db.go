@@ -14,9 +14,9 @@ import (
 )
 
 type Storage interface {
-	Registeruser(user User) error
-	Loginuser(user User) error
-	UpOrderuser(name string, numorder int) error
+	RegisterUser(user User) error
+	LoginUser(user User) error
+	UpOrderUser(name string, numorder int) error
 }
 
 type User struct {
@@ -62,7 +62,7 @@ func NewDataBase(dbname string) (Storage, error) {
 	return &DB{db: db}, nil
 }
 
-func (db *DB) Registeruser(user User) error {
+func (db *DB) RegisterUser(user User) error {
 	hashPassword := md5.Sum([]byte(user.Password))
 
 	_, err := db.db.Exec("INSERT INTO users(login, password)"+" VALUES($1,$2)", user.Login, hex.EncodeToString(hashPassword[:]))
@@ -77,7 +77,7 @@ func (db *DB) Registeruser(user User) error {
 	return nil
 }
 
-func (db *DB) Loginuser(user User) error {
+func (db *DB) LoginUser(user User) error {
 	rows := db.db.QueryRow("SELECT password FROM users WHERE login = $1", user.Login)
 	var password string
 	err := rows.Scan(&password)
@@ -91,7 +91,7 @@ func (db *DB) Loginuser(user User) error {
 	return nil
 }
 
-func (db *DB) UpOrderuser(name string, numorder int) error {
+func (db *DB) UpOrderUser(name string, numorder int) error {
 	rows := db.db.QueryRow("SELECT id FROM users WHERE login = $1", name)
 	var id int
 	err := rows.Scan(&id)

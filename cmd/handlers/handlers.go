@@ -35,7 +35,7 @@ func (st start) Register(res http.ResponseWriter, req *http.Request) {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return
 	}
-	err := st.database.Registeruser(user)
+	err := st.database.RegisterUser(user)
 	if err != nil {
 		if errors.Is(err, db.ErrDuplicateUser) {
 			res.WriteHeader(http.StatusConflict)
@@ -58,7 +58,7 @@ func (st start) Login(res http.ResponseWriter, req *http.Request) {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return
 	}
-	err := st.database.Loginuser(user)
+	err := st.database.LoginUser(user)
 	if err != nil {
 		if errors.Is(err, db.ErrInvalidCredentials) {
 			res.WriteHeader(http.StatusUnauthorized)
@@ -91,7 +91,7 @@ func (st start) UpOrder(res http.ResponseWriter, req *http.Request) {
 		res.WriteHeader(http.StatusUnprocessableEntity)
 		return
 	}
-	err = st.database.UpOrderuser(name.Value, numorder)
+	err = st.database.UpOrderUser(name.Value, numorder)
 	if err != nil {
 		if errors.Is(err, db.ErrDuplicateOrder) {
 			res.WriteHeader(http.StatusConflict)
