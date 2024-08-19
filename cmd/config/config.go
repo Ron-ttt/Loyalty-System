@@ -7,7 +7,7 @@ import (
 
 func Flags() (string, string, string) {
 	// Определение флагов
-	address := *flag.String("a", "localhost:8080", "адрес запуска HTTP-сервера")
+	address := flag.String("a", "localhost:80v80", "адрес запуска HTTP-сервера")
 
 	addressbonus := flag.String("r", "", "адрес системы расчёта начислений")
 
@@ -16,7 +16,7 @@ func Flags() (string, string, string) {
 	// Парсинг флагов
 	flag.Parse()
 	if envAddress := os.Getenv("RUN_ADDRESS"); envAddress != "" {
-		address = envAddress
+		*address = envAddress
 	}
 
 	if envaddressbonus := os.Getenv("ACCRUAL_SYSTEM_ADDRESS"); envaddressbonus != "" {
@@ -27,5 +27,5 @@ func Flags() (string, string, string) {
 		*db = envDB
 	}
 
-	return address, *addressbonus, *db
+	return *address, *addressbonus, *db
 }

@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"x2/cmd/config"
 	"x2/cmd/db"
@@ -11,8 +12,8 @@ import (
 
 func Init() start {
 	url, addressURL, dbname := config.Flags()
-	dbname = "postgresql://postgres:190603@localhost:5432/postgres?sslmode=disable"
-
+	//dbname = "postgresql://postgres:190603@localhost:5432/postgres?sslmode=disable"
+	fmt.Println(url)
 	db, err1 := db.NewDataBase(dbname)
 	if err1 != nil {
 		panic(err1)
