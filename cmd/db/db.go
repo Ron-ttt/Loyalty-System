@@ -60,7 +60,9 @@ func NewDataBase(dbname string) (Storage, error) {
 }
 
 func (db *DB) Registeruser(user User) error {
-	_, err := db.db.Exec("INSERT INTO users(login, password)"+" VALUES($1,$2)", user.Login, md5.Sum([]byte(user.Password)))
+	hashPassword := md5.Sum([]byte(user.Password))
+
+	_, err := db.db.Exec("INSERT INTO users(login, password)"+" VALUES($1,$2)", user.Login, hex.EncodeToString(hashPassword[:]))
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok {
 			if pqErr.Code == "23505" {

@@ -13,7 +13,8 @@ type ToHand struct {
 	IsAuth bool
 }
 
-var namecookie string = "username"
+// константа норм глобальная переменная нет
+const namecookie string = "username"
 
 func AuthMiddleware(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -46,8 +47,10 @@ func NewCookie(w http.ResponseWriter, name string) error {
 		Value: name,
 	}
 	err1 := cookies.WriteEncrypted(w, cookie, secretKey)
-	if err1 != nil {
-		return err1
-	}
-	return nil
+	// if err1 != nil {
+	// 	return err1
+	// }
+	// return nil
+	//можно просто ошибку возвращять
+	return err1
 }
