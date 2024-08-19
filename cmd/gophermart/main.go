@@ -23,7 +23,7 @@ func main() {
 	r.HandleFunc("/api/orders/{number}", st.InfoBonus).Methods(http.MethodGet)
 
 	log.Println("server is running")
-	log.Fatal(http.ListenAndServe(st.URL, r))
+	//log.Fatal(http.ListenAndServe(st.URL, r))
 
 	//панику лучше ну вызывать
 
