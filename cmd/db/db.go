@@ -23,7 +23,7 @@ type User struct {
 	Password string `json:"password"`
 }
 
-type Db struct {
+type DB struct {
 	db *sql.DB
 }
 
@@ -56,10 +56,10 @@ func NewDataBase(dbname string) (Storage, error) {
 		return nil, err
 	}
 
-	return &Db{db: db}, nil
+	return &DB{db: db}, nil
 }
 
-func (db *Db) Registeruser(user User) error {
+func (db *DB) Registeruser(user User) error {
 	_, err := db.db.Exec("INSERT INTO users(login, password)"+" VALUES($1,$2)", user.Login, md5.Sum([]byte(user.Password)))
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok {
@@ -71,7 +71,7 @@ func (db *Db) Registeruser(user User) error {
 	return nil
 }
 
-func (db *Db) Loginuser(user User) error {
+func (db *DB) Loginuser(user User) error {
 	rows := db.db.QueryRow("SELECT password FROM users WHERE login = $1", user.Login)
 	var password string
 	err := rows.Scan(&password)
