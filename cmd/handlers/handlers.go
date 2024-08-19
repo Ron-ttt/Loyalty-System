@@ -9,7 +9,7 @@ import (
 	"x2/cmd/middleware"
 )
 
-func Starts() start {
+func Init() start {
 	url, addressURL, dbname := config.Flags()
 	dbname = "postgresql://postgres:190603@localhost:5432/postgres?sslmode=disable"
 

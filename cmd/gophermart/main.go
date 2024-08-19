@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	st := handlers.Starts()
+	st := handlers.Init()
 	r := mux.NewRouter()
 	r.HandleFunc("/api/user/register", st.Register).Methods(http.MethodPost)
 	r.HandleFunc("/api/user/login", st.Login).Methods(http.MethodPost)
