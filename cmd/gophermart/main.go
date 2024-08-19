@@ -22,7 +22,6 @@ func main() {
 
 	log.Println("server is running")
 	//log.Fatal(http.ListenAndServe(st.URL, r))
-	log.Fatal(http.ListenAndServe("localhost:8080", r))
 
 	//панику лучше ну вызывать
 
