@@ -86,6 +86,7 @@ func (st start) GetOrder(res http.ResponseWriter, req *http.Request) {
 		res.WriteHeader(http.StatusUnauthorized)
 		return
 	}
+
 }
 
 func (st start) Balance(res http.ResponseWriter, req *http.Request) {
