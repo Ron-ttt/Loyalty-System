@@ -5,41 +5,27 @@ import (
 	"os"
 )
 
-type Cfg struct {
-	ServerAddress  string
-	DBAddress      *string
-	AccrualAddress *string
-}
-
-var config Cfg
-
-func init() {
-	config.ServerAddress = *flag.String("a", "localhost:8080", "server address")
-	config.DBAddress = flag.String("d", "", "data base connection address")
-	config.AccrualAddress = flag.String("r", "", "accrual system server address")
-}
 func Flags() (string, string, string) {
 	// Определение флагов
+	address := flag.String("a", "localhost:80v80", "адрес запуска HTTP-сервера")
+
+	addressbonus := flag.String("r", "", "адрес системы расчёта начислений")
+
+	db := flag.String("d", "postgresql://postgres:190603@localhost:5432/postgres?sslmode=disable", "адрес для бд")
 
 	// Парсинг флагов
 	flag.Parse()
+	if envAddress := os.Getenv("RUN_ADDRESS"); envAddress != "" {
+		*address = envAddress
+	}
 
-	dbAddressEnv := os.Getenv("DATABASE_URI")
+	if envaddressbonus := os.Getenv("ACCRUAL_SYSTEM_ADDRESS"); envaddressbonus != "" {
+		*addressbonus = envaddressbonus
+	}
 
-	if dbAddressEnv != "" {
-		config.DBAddress = &dbAddressEnv
+	if envDB := os.Getenv("DATABASE_URI"); envDB != "" {
+		*db = envDB
 	}
-	serverAddressEnv := os.Getenv("RUN_ADDRESS")
-	if serverAddressEnv != "" {
-		config.ServerAddress = serverAddressEnv
-	}
-	accrualEnv := os.Getenv("ACCRUAL_SYSTEM_ADDRESS")
-	if accrualEnv != "" {
-		config.AccrualAddress = &accrualEnv
-	}
-	if *config.DBAddress == "" || *config.AccrualAddress == "" || config.ServerAddress == "" {
-		panic("invalid config")
-	}
-	return config.ServerAddress, *config.AccrualAddress, *config.DBAddress
 
+	return *address, *addressbonus, *db
 }
