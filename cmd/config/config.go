@@ -7,7 +7,7 @@ import (
 
 func Flags() (string, string, string) {
 	// Определение флагов
-	address := flag.String("a", "localhost:80v80", "адрес запуска HTTP-сервера")
+	address := flag.String("a", "localhost:8080", "адрес запуска HTTP-сервера")
 
 	addressbonus := flag.String("r", "", "адрес системы расчёта начислений")
 

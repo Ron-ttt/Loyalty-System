@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"x2/cmd/handlers"
+	"x2/cmd/middleware"
 
 	"github.com/gorilla/mux"
 )
@@ -11,6 +12,7 @@ import (
 func main() {
 	st := handlers.Init()
 	r := mux.NewRouter()
+	r.Use(middleware.AuthMiddleware)
 	r.HandleFunc("/api/user/register", st.Register).Methods(http.MethodPost)
 	r.HandleFunc("/api/user/login", st.Login).Methods(http.MethodPost)
 	r.HandleFunc("/api/user/orders", st.UpOrder).Methods(http.MethodPost)

@@ -19,12 +19,16 @@ const namecookie string = "username"
 func AuthMiddleware(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var th ToHand
+		var key ContextKey = "Name"
 		secretKey := []byte("mandarinmandarin")
 		namecookie := "username"
 		value, err := cookies.ReadEncrypted(r, namecookie, secretKey)
 		if err != nil {
 			if errors.Is(err, http.ErrNoCookie) {
-				h.ServeHTTP(w, r)
+				th.IsAuth = true
+				th.Value = ""
+				ctx := context.WithValue(r.Context(), key, th)
+				h.ServeHTTP(w, r.WithContext(ctx))
 				return
 			} else {
 				http.Error(w, err.Error(), http.StatusBadRequest)
@@ -34,7 +38,6 @@ func AuthMiddleware(h http.Handler) http.Handler {
 			th.IsAuth = true
 			th.Value = value
 		}
-		var key ContextKey = "Name"
 		ctx := context.WithValue(r.Context(), key, th)
 		h.ServeHTTP(w, r.WithContext(ctx))
 	})

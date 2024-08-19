@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
+	"strconv"
 	"x2/cmd/config"
 	"x2/cmd/db"
 	"x2/cmd/middleware"
@@ -79,6 +81,30 @@ func (st start) UpOrder(res http.ResponseWriter, req *http.Request) {
 		res.WriteHeader(http.StatusUnauthorized)
 		return
 	}
+	numorderbyte, err := io.ReadAll(req.Body)
+	if err != nil {
+		http.Error(res, "unable to read body", http.StatusBadRequest)
+		return
+	}
+	numorder, err1 := strconv.Atoi(string(numorderbyte))
+	if err1 != nil {
+		res.WriteHeader(http.StatusUnprocessableEntity)
+		return
+	}
+	err = st.database.UpOrderuser(name.Value, numorder)
+	if err != nil {
+		if errors.Is(err, db.ErrDuplicateOrder) {
+			res.WriteHeader(http.StatusConflict)
+			return
+		}
+		if errors.Is(err, db.ErrAlreadyUpload) {
+			res.WriteHeader(http.StatusOK)
+			return
+		}
+		res.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	res.WriteHeader(http.StatusAccepted)
 }
 
 func (st start) GetOrder(res http.ResponseWriter, req *http.Request) {
