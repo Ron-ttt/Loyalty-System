@@ -19,7 +19,7 @@ var config Cfg
 
 func init() {
 	config.ServerAddress = *flag.String("a", "localhost:8080", "server address")
-	config.DBAddress = flag.String("d", "", "data base connection address")
+	config.DBAddress = flag.String("d", "postgresql://postgres:190603@localhost:5432/postgres?sslmode=disable", "data base connection address")
 	config.AccrualAddress = flag.String("r", "", "accrual system server address")
 }
 func NewConfig() Cfg {

@@ -14,8 +14,8 @@ import (
 
 func Init() start {
 	cfg := config.NewConfig()
-	dbb := "postgresql://localhost:5432/shvm?sslmode=disable"
-	cfg.DBAddress = &dbb
+	//dbb := "postgresql://postgres:190603@localhost:5432/postgres?sslmode=disable"
+	//cfg.DBAddress = &dbb
 	fmt.Println(cfg.ServerAddress)
 	db, err1 := db.NewDataBase(*cfg.DBAddress)
 	if err1 != nil {
