@@ -142,6 +142,9 @@ func (db *DB) GetOrderUser(name string) ([]Orders, error) {
 
 	var listorders []Orders
 	rows, err := db.db.Query("SELECT order_id, status, created_at FROM orders WHERE users_id=$1 order by created_at desc", id)
+	if rows.Err() != nil {
+		return nil, err
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -163,6 +166,9 @@ func (db *DB) GetOrderUser(name string) ([]Orders, error) {
 
 func (db *DB) BalanceUser(name string) (Account, error) {
 	rows, err := db.db.Query("SELECT bonus FROM orders WHERE users_id=(SELECT id FROM users WHERE login = $1)", name)
+	if rows.Err() != nil {
+		return Account{}, err
+	}
 	if err != nil {
 		return Account{}, err
 	}
