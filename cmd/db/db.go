@@ -19,6 +19,7 @@ type Storage interface {
 	LoginUser(user User) error
 	UpOrderUser(name string, numorder int) error
 	GetOrderUser(name string) ([]Orders, error)
+	BalanceUser(name string) (Account, error)
 }
 type Orders struct {
 	Number  int       `json:"number"`
@@ -31,7 +32,10 @@ type User struct {
 	Login    string `json:"login"`
 	Password string `json:"password"`
 }
-
+type Account struct {
+	Current   float32 `json:"current"`
+	Withdrawn float32 `json:"withdrawn"`
+}
 type DB struct {
 	db *sql.DB
 }
@@ -155,4 +159,35 @@ func (db *DB) GetOrderUser(name string) ([]Orders, error) {
 		listorders = append(listorders, order)
 	}
 	return listorders, nil
+}
+
+func (db *DB) BalanceUser(name string) (Account, error) {
+	row := db.db.QueryRow("SELECT id FROM users WHERE login = $1", name)
+	var id int
+	err := row.Scan(&id)
+	if err != nil {
+		return Account{}, err
+	}
+	rows, err := db.db.Query("SELECT bonus FROM orders WHERE users_id=$1", id)
+	if err != nil {
+		return Account{}, err
+	}
+	var list []float32
+	for rows.Next() {
+		var num float32
+		err := rows.Scan(num)
+		if err != nil {
+			return Account{}, err
+		}
+		list = append(list, num)
+	}
+	var wd float32 = 0
+	var cur float32 = 0
+	for _, value := range list {
+		if value < 0 {
+			wd = wd - value
+		}
+		cur = cur + value
+	}
+	return Account{Current: cur, Withdrawn: wd}, nil
 }

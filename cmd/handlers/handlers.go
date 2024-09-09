@@ -132,7 +132,7 @@ func (st start) GetOrder(res http.ResponseWriter, req *http.Request) {
 		http.Error(res, err.Error(), http.StatusInternalServerError)
 		return
 	}
-
+	res.WriteHeader(http.StatusOK)
 }
 
 // получение текущего баланса счёта баллов лояльности пользователя
@@ -142,6 +142,17 @@ func (st start) Balance(res http.ResponseWriter, req *http.Request) {
 		res.WriteHeader(http.StatusUnauthorized)
 		return
 	}
+	var bonus db.Account
+	bonus, err := st.database.BalanceUser(name.Value)
+	if err != nil {
+		http.Error(res, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if err := json.NewEncoder(res).Encode(bonus); err != nil {
+		http.Error(res, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	res.WriteHeader(http.StatusOK)
 }
 
 // запрос на списание баллов с накопительного счёта в счёт оплаты нового заказа
