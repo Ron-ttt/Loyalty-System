@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"net/http"
-	"x2/cmd/cookies"
+	"x2/internal/cookies"
 )
 
 type ContextKey string

@@ -3,9 +3,9 @@ package main
 import (
 	"log"
 	"net/http"
-	"x2/cmd/config"
-	"x2/cmd/handlers"
-	"x2/cmd/middleware"
+	"x2/internal/config"
+	"x2/internal/handlers"
+	"x2/internal/middleware"
 
 	"github.com/gorilla/mux"
 )

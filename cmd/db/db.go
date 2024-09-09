@@ -61,7 +61,7 @@ func NewDataBase(dbname string) (Storage, error) {
 		return nil, err
 	}
 	m, err := migrate.NewWithDatabaseInstance(
-		"file://./../migrations",
+		"file://./db/migrations",
 		"postgres", driver)
 	if err != nil {
 		fmt.Println("3", err)

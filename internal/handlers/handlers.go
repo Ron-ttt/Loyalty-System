@@ -7,9 +7,9 @@ import (
 	"io"
 	"net/http"
 	"strconv"
-	"x2/cmd/config"
 	"x2/cmd/db"
-	"x2/cmd/middleware"
+	"x2/internal/config"
+	"x2/internal/middleware"
 )
 
 func Init() start {
