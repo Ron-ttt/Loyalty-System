@@ -25,7 +25,5 @@ func main() {
 
 	log.Println("server is running")
 	log.Fatal(http.ListenAndServe(config.GetServerAddress(), r))
-
 	//панику лучше ну вызывать
-
 }

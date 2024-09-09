@@ -22,7 +22,7 @@ type Storage interface {
 	BalanceUser(name string) (Account, error)
 }
 type Orders struct {
-	Number  int       `json:"number"`
+	Number  string    `json:"number"`
 	Status  string    `json:"status"`
 	Accrual int       `json:"accrual"`
 	Time    time.Time `json:"-"`
