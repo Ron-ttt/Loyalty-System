@@ -38,7 +38,7 @@ func NewConfig() Cfg {
 		config.AccrualAddress = &accrualEnv
 	}
 	if *config.DBAddress == "" || *config.AccrualAddress == "" || config.ServerAddress == "" {
-		panic("invalid config")
+		//panic("invalid config")
 	}
 	return config
 }

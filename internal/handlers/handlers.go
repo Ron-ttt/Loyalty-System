@@ -7,14 +7,15 @@ import (
 	"io"
 	"net/http"
 	"strconv"
-	"x2/cmd/db"
 	"x2/internal/config"
+	"x2/internal/db"
 	"x2/internal/middleware"
 )
 
 func Init() start {
 	cfg := config.NewConfig()
-	//dbname = "postgresql://postgres:190603@localhost:5432/postgres?sslmode=disable"
+	dbb := "postgresql://localhost:5432/shvm?sslmode=disable"
+	cfg.DBAddress = &dbb
 	fmt.Println(cfg.ServerAddress)
 	db, err1 := db.NewDataBase(*cfg.DBAddress)
 	if err1 != nil {

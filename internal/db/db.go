@@ -11,6 +11,7 @@ import (
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/lib/pq"
 )
 
@@ -49,15 +50,13 @@ var (
 )
 
 func NewDataBase(dbname string) (Storage, error) {
-	db, err := sql.Open("postgres", dbname)
+	db, err := sql.Open("pgx", dbname)
 	if err != nil {
 		fmt.Println("1", err)
 		return nil, err
 	}
 	driver, err := postgres.WithInstance(db, &postgres.Config{})
 	if err != nil {
-		fmt.Println("444", err)
-		fmt.Println("2", err)
 		return nil, err
 	}
 	m, err := migrate.NewWithDatabaseInstance(
