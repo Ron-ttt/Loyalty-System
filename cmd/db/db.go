@@ -172,8 +172,8 @@ func (db *DB) BalanceUser(name string) (Account, error) {
 	if err != nil {
 		return Account{}, err
 	}
-	var wd int = 0
-	var cur int = 0
+	wd := 0
+	cur := 0
 	for rows.Next() {
 		var num int
 		err := rows.Scan(&num)
