@@ -148,6 +148,7 @@ func (st start) Balance(res http.ResponseWriter, req *http.Request) {
 		http.Error(res, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	res.Header().Set("content-type", "application/json")
 	if err := json.NewEncoder(res).Encode(bonus); err != nil {
 		http.Error(res, err.Error(), http.StatusInternalServerError)
 		return

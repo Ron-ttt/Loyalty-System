@@ -33,8 +33,8 @@ type User struct {
 	Password string `json:"password"`
 }
 type Account struct {
-	Current   float32 `json:"current"`
-	Withdrawn float32 `json:"withdrawn"`
+	Current   int `json:"current"`
+	Withdrawn int `json:"withdrawn"`
 }
 type DB struct {
 	db *sql.DB
@@ -162,27 +162,21 @@ func (db *DB) GetOrderUser(name string) ([]Orders, error) {
 }
 
 func (db *DB) BalanceUser(name string) (Account, error) {
-	row := db.db.QueryRow("SELECT id FROM users WHERE login = $1", name)
-	var id int
-	err := row.Scan(&id)
+	rows, err := db.db.Query("SELECT bonus FROM orders WHERE users_id=(SELECT id FROM users WHERE login = $1)", name)
 	if err != nil {
 		return Account{}, err
 	}
-	rows, err := db.db.Query("SELECT bonus FROM orders WHERE users_id=$1", id)
-	if err != nil {
-		return Account{}, err
-	}
-	var list []float32
+	var list []int
 	for rows.Next() {
-		var num float32
-		err := rows.Scan(num)
+		var num int
+		err := rows.Scan(&num)
 		if err != nil {
 			return Account{}, err
 		}
 		list = append(list, num)
 	}
-	var wd float32 = 0
-	var cur float32 = 0
+	var wd int = 0
+	var cur int = 0
 	for _, value := range list {
 		if value < 0 {
 			wd = wd - value
