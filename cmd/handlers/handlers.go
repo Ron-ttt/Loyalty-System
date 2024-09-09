@@ -13,14 +13,14 @@ import (
 )
 
 func Init() start {
-	url, addressURL, dbname := config.Flags()
+	cfg := config.NewConfig()
 	//dbname = "postgresql://postgres:190603@localhost:5432/postgres?sslmode=disable"
-	fmt.Println(url)
-	db, err1 := db.NewDataBase(dbname)
+	fmt.Println(cfg.ServerAddress)
+	db, err1 := db.NewDataBase(*cfg.DBAddress)
 	if err1 != nil {
 		panic(err1)
 	}
-	return start{URL: url, addressBonus: addressURL, database: db}
+	return start{URL: cfg.ServerAddress, addressBonus: *cfg.AccrualAddress, database: db}
 }
 
 type start struct {

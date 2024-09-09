@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"x2/cmd/config"
 	"x2/cmd/handlers"
 	"x2/cmd/middleware"
 
@@ -23,7 +24,7 @@ func main() {
 	r.HandleFunc("/api/orders/{number}", st.InfoBonus).Methods(http.MethodGet)
 
 	log.Println("server is running")
-	log.Fatal(http.ListenAndServe(st.URL, r))
+	log.Fatal(http.ListenAndServe(config.GetServerAddress(), r))
 
 	//панику лучше ну вызывать
 
