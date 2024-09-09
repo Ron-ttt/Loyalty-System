@@ -25,7 +25,7 @@ func AuthMiddleware(h http.Handler) http.Handler {
 		value, err := cookies.ReadEncrypted(r, namecookie, secretKey)
 		if err != nil {
 			if errors.Is(err, http.ErrNoCookie) {
-				th.IsAuth = true
+				th.IsAuth = false
 				th.Value = ""
 				ctx := context.WithValue(r.Context(), key, th)
 				h.ServeHTTP(w, r.WithContext(ctx))

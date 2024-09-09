@@ -29,6 +29,7 @@ type start struct {
 	database     db.Storage
 }
 
+// регистрация пользователя
 func (st start) Register(res http.ResponseWriter, req *http.Request) {
 	var user db.User
 	if err := json.NewDecoder(req.Body).Decode(&user); err != nil {
@@ -52,6 +53,7 @@ func (st start) Register(res http.ResponseWriter, req *http.Request) {
 	res.WriteHeader(http.StatusOK)
 }
 
+// аутентификация пользователя
 func (st start) Login(res http.ResponseWriter, req *http.Request) {
 	var user db.User
 	if err := json.NewDecoder(req.Body).Decode(&user); err != nil {
@@ -75,6 +77,7 @@ func (st start) Login(res http.ResponseWriter, req *http.Request) {
 	res.WriteHeader(http.StatusOK)
 }
 
+// загрузка пользователем номера заказа для расчёта
 func (st start) UpOrder(res http.ResponseWriter, req *http.Request) {
 	name := req.Context().Value(middleware.ContextKey("Name")).(middleware.ToHand)
 	if !name.IsAuth {
@@ -107,14 +110,32 @@ func (st start) UpOrder(res http.ResponseWriter, req *http.Request) {
 	res.WriteHeader(http.StatusAccepted)
 }
 
+// получение списка загруженных пользователем номеров заказов,
+// статусов их обработки и информации о начислениях
 func (st start) GetOrder(res http.ResponseWriter, req *http.Request) {
 	name := req.Context().Value(middleware.ContextKey("Name")).(middleware.ToHand)
 	if !name.IsAuth {
 		res.WriteHeader(http.StatusUnauthorized)
 		return
 	}
+	orders, err := st.database.GetOrderUser(name.Value)
+	if err != nil {
+		if errors.Is(err, db.ErrNoOrders) {
+			http.Error(res, err.Error(), http.StatusNoContent)
+			return
+		}
+		res.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	res.Header().Set("content-type", "application/json")
+	if err := json.NewEncoder(res).Encode(orders); err != nil {
+		http.Error(res, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
 }
 
+// получение текущего баланса счёта баллов лояльности пользователя
 func (st start) Balance(res http.ResponseWriter, req *http.Request) {
 	name := req.Context().Value(middleware.ContextKey("Name")).(middleware.ToHand)
 	if !name.IsAuth {
@@ -123,6 +144,7 @@ func (st start) Balance(res http.ResponseWriter, req *http.Request) {
 	}
 }
 
+// запрос на списание баллов с накопительного счёта в счёт оплаты нового заказа
 func (st start) LossBonus(res http.ResponseWriter, req *http.Request) {
 	name := req.Context().Value(middleware.ContextKey("Name")).(middleware.ToHand)
 	if !name.IsAuth {
@@ -131,6 +153,7 @@ func (st start) LossBonus(res http.ResponseWriter, req *http.Request) {
 	}
 }
 
+// получение информации о выводе средств с накопительного счёта пользователем
 func (st start) Info(res http.ResponseWriter, req *http.Request) {
 	name := req.Context().Value(middleware.ContextKey("Name")).(middleware.ToHand)
 	if !name.IsAuth {
@@ -139,6 +162,7 @@ func (st start) Info(res http.ResponseWriter, req *http.Request) {
 	}
 }
 
+// получение информации о расчёте начислений баллов лояльности
 func (st start) InfoBonus(res http.ResponseWriter, req *http.Request) {
 	name := req.Context().Value(middleware.ContextKey("Name")).(middleware.ToHand)
 	if !name.IsAuth {

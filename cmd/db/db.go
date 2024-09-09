@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"time"
 
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
@@ -17,8 +18,15 @@ type Storage interface {
 	RegisterUser(user User) error
 	LoginUser(user User) error
 	UpOrderUser(name string, numorder int) error
+	GetOrderUser(name string) ([]Orders, error)
 }
-
+type Orders struct {
+	Number  int       `json:"number"`
+	Status  string    `json:"status"`
+	Accrual int       `json:"accrual"`
+	Time    time.Time `json:"-"`
+	TimeRfc string    `json:"uploaded_at"`
+}
 type User struct {
 	Login    string `json:"login"`
 	Password string `json:"password"`
@@ -33,6 +41,7 @@ var (
 	ErrInvalidCredentials = errors.New("invalid password or login")
 	ErrDuplicateOrder     = errors.New("order belongs to another user")
 	ErrAlreadyUpload      = errors.New("order upload before")
+	ErrNoOrders           = errors.New("order no upload")
 )
 
 func NewDataBase(dbname string) (Storage, error) {
@@ -117,4 +126,33 @@ func (db *DB) UpOrderUser(name string, numorder int) error {
 		return err
 	}
 	return nil
+}
+
+func (db *DB) GetOrderUser(name string) ([]Orders, error) {
+	row := db.db.QueryRow("SELECT id FROM users WHERE login = $1", name)
+	var id int
+	err := row.Scan(&id)
+	if err != nil {
+		return nil, err
+	}
+
+	var listorders []Orders
+	rows, err := db.db.Query("SELECT order_id, status, created_at FROM orders WHERE users_id=$1 order by created_at desc", id)
+	if err != nil {
+		return nil, err
+	}
+	if rows == nil {
+		return nil, ErrNoOrders
+	}
+	for rows.Next() {
+		var order Orders
+		err := rows.Scan(&order.Number, &order.Status, &order.Time)
+		if err != nil {
+			return nil, err
+		}
+
+		order.TimeRfc = order.Time.Format(time.RFC3339)
+		listorders = append(listorders, order)
+	}
+	return listorders, nil
 }
