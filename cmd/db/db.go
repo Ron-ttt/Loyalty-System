@@ -166,22 +166,18 @@ func (db *DB) BalanceUser(name string) (Account, error) {
 	if err != nil {
 		return Account{}, err
 	}
-	var list []int
+	var wd int = 0
+	var cur int = 0
 	for rows.Next() {
 		var num int
 		err := rows.Scan(&num)
 		if err != nil {
 			return Account{}, err
 		}
-		list = append(list, num)
-	}
-	var wd int = 0
-	var cur int = 0
-	for _, value := range list {
-		if value < 0 {
-			wd = wd - value
+		if num < 0 {
+			wd = wd - num
 		}
-		cur = cur + value
+		cur = cur + num
 	}
 	return Account{Current: cur, Withdrawn: wd}, nil
 }
