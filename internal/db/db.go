@@ -50,7 +50,7 @@ var (
 )
 
 func NewDataBase(dbname string) (Storage, error) {
-	db, err := sql.Open("pgx", dbname)
+	db, err := sql.Open("postgres", dbname)
 	if err != nil {
 		fmt.Println("1", err)
 		return nil, err
@@ -60,6 +60,7 @@ func NewDataBase(dbname string) (Storage, error) {
 		return nil, err
 	}
 	m, err := migrate.NewWithDatabaseInstance(
+		//"file://C:/Users/lolim/x2/x2/db/migrations",
 		"file://./db/migrations",
 		"postgres", driver)
 	if err != nil {
