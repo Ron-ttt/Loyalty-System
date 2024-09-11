@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/golang-migrate/migrate/v4"
@@ -21,6 +22,12 @@ type Storage interface {
 	UpOrderUser(name string, numorder int) error
 	GetOrderUser(name string) ([]Orders, error)
 	BalanceUser(name string) (Account, error)
+	Updateorderdata(data Accrual)
+}
+type Accrual struct {
+	Order   string `json:"order"`
+	Status  string `json:"status"`
+	Accrual int    `json:"accrual"`
 }
 type Orders struct {
 	Number  string    `json:"number"`
@@ -186,4 +193,11 @@ func (db *DB) BalanceUser(name string) (Account, error) {
 		cur = cur + num
 	}
 	return Account{Current: cur, Withdrawn: wd}, nil
+}
+
+func (db *DB) Updateorderdata(data Accrual) {
+	_, err := db.db.Exec("UPDATE orders(status, bonus)"+" VALUES($1,$2) WHERE order_id = $3", data.Status, data.Accrual, data.Order)
+	if err != nil {
+		log.Println("бд решила что может творить хуйню")
+	}
 }

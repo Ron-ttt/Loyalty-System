@@ -5,12 +5,19 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"strconv"
 	"x2/internal/config"
 	"x2/internal/db"
 	"x2/internal/middleware"
 )
+
+type Accrual struct {
+	Order   string `json:"order"`
+	Status  string `json:"status"`
+	Accrual int    `json:"accrual"`
+}
 
 func Init() start {
 	cfg := config.NewConfig()
@@ -109,6 +116,17 @@ func (st start) UpOrder(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 	res.WriteHeader(http.StatusAccepted)
+
+	var order db.Accrual
+	address := "http://localhost:8080/api/orders/" + strconv.Itoa(numorder)
+	resp, err := http.Get(address)
+	if err != nil {
+		log.Println("запрос кудато не ушел все наебнулось")
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&order); err != nil {
+		log.Println("джейсон выебывается")
+	}
+	st.database.Updateorderdata(order)
 }
 
 // получение списка загруженных пользователем номеров заказов,
