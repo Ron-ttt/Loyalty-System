@@ -197,7 +197,7 @@ func (db *DB) BalanceUser(name string) (Account, error) {
 }
 
 func (db *DB) UpdateOrderData(data Accrual) error {
-	_, err := db.db.Exec("UPDATE orders(status, bonus) SET VALUES($1,$2) WHERE order_id = $3", data.Status, data.Accrual, data.Order)
+	_, err := db.db.Exec("UPDATE orders SET VALUES status=$1,bonus=$2 WHERE order_id = $3", data.Status, data.Accrual, data.Order)
 	if err != nil {
 		log.Println("бд решила что может творить хуйню", err)
 		return err
