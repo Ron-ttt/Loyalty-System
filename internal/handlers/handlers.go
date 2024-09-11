@@ -8,16 +8,11 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 	"x2/internal/config"
 	"x2/internal/db"
 	"x2/internal/middleware"
 )
-
-type Accrual struct {
-	Order   string `json:"order"`
-	Status  string `json:"status"`
-	Accrual int    `json:"accrual"`
-}
 
 func Init() start {
 	cfg := config.NewConfig()
@@ -29,6 +24,24 @@ func Init() start {
 		panic(err1)
 	}
 	return start{URL: cfg.ServerAddress, addressBonus: *cfg.AccrualAddress, database: db}
+}
+func (st start) Bonus() {
+	ticker := time.Tick(60 * time.Second)
+	for range ticker {
+		var order db.Accrual
+		list := st.database.Numorder()
+		for _, num := range list {
+			address := st.addressBonus + "/api/orders/" + num
+			resp, err := http.Get(address)
+			if err != nil {
+				log.Println("запрос кудато не ушел все наебнулось")
+			}
+			if err := json.NewDecoder(resp.Body).Decode(&order); err != nil {
+				log.Println("джейсон выебывается")
+			}
+			st.database.Updateorderdata(order)
+		}
+	}
 }
 
 type start struct {
@@ -117,16 +130,6 @@ func (st start) UpOrder(res http.ResponseWriter, req *http.Request) {
 	}
 	res.WriteHeader(http.StatusAccepted)
 
-	var order db.Accrual
-	address := "http://localhost:8080/api/orders/" + strconv.Itoa(numorder)
-	resp, err := http.Get(address)
-	if err != nil {
-		log.Println("запрос кудато не ушел все наебнулось")
-	}
-	if err := json.NewDecoder(resp.Body).Decode(&order); err != nil {
-		log.Println("джейсон выебывается")
-	}
-	st.database.Updateorderdata(order)
 }
 
 // получение списка загруженных пользователем номеров заказов,
@@ -186,15 +189,6 @@ func (st start) LossBonus(res http.ResponseWriter, req *http.Request) {
 
 // получение информации о выводе средств с накопительного счёта пользователем
 func (st start) Info(res http.ResponseWriter, req *http.Request) {
-	name := req.Context().Value(middleware.ContextKey("Name")).(middleware.ToHand)
-	if !name.IsAuth {
-		res.WriteHeader(http.StatusUnauthorized)
-		return
-	}
-}
-
-// получение информации о расчёте начислений баллов лояльности
-func (st start) InfoBonus(res http.ResponseWriter, req *http.Request) {
 	name := req.Context().Value(middleware.ContextKey("Name")).(middleware.ToHand)
 	if !name.IsAuth {
 		res.WriteHeader(http.StatusUnauthorized)

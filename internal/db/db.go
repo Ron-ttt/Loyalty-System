@@ -23,6 +23,7 @@ type Storage interface {
 	GetOrderUser(name string) ([]Orders, error)
 	BalanceUser(name string) (Account, error)
 	Updateorderdata(data Accrual)
+	Numorder() []string
 }
 type Accrual struct {
 	Order   string `json:"order"`
@@ -200,4 +201,27 @@ func (db *DB) Updateorderdata(data Accrual) {
 	if err != nil {
 		log.Println("бд решила что может творить хуйню")
 	}
+}
+
+func (db *DB) Numorder() []string {
+	rows, err := db.db.Query("SELECT order_id FROM orders WHERE status = 'NEW' OR status = 'INVALID' OR status = ''PROCESSING' OR status = 'REGISTERED'")
+	if rows.Err() != nil {
+		log.Println("бд решила что может творить хуйню")
+		return nil
+	}
+	if err != nil {
+		log.Println("бд решила что может творить хуйню")
+		return nil
+	}
+	var list []string
+	for rows.Next() {
+		var num string
+		err := rows.Scan(&num)
+		if err != nil {
+			log.Println("скан решила что может творить хуйню")
+			return nil
+		}
+		list = append(list, num)
+	}
+	return list
 }
