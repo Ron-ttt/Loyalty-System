@@ -26,7 +26,10 @@ func Init() start {
 }
 func (st start) Bonus() error {
 	var order db.Accrual
-	list := st.database.Numorder()
+	list, err := st.database.NumOrder()
+	if err != nil {
+		return err
+	}
 	for _, num := range list {
 		address := st.addressBonus + "/api/orders/" + num
 		resp, err := http.Get(address)
@@ -42,7 +45,10 @@ func (st start) Bonus() error {
 			log.Println("джейсон выебывается")
 			return err
 		}
-		st.database.Updateorderdata(order)
+		err = st.database.UpdateOrderData(order)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }

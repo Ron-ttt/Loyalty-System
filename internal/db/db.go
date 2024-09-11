@@ -22,8 +22,8 @@ type Storage interface {
 	UpOrderUser(name string, numorder int) error
 	GetOrderUser(name string) ([]Orders, error)
 	BalanceUser(name string) (Account, error)
-	Updateorderdata(data Accrual)
-	Numorder() []string
+	UpdateOrderData(data Accrual) error
+	NumOrder() ([]string, error)
 }
 type Accrual struct {
 	Order   string `json:"order"`
@@ -196,22 +196,24 @@ func (db *DB) BalanceUser(name string) (Account, error) {
 	return Account{Current: cur, Withdrawn: wd}, nil
 }
 
-func (db *DB) Updateorderdata(data Accrual) {
+func (db *DB) UpdateOrderData(data Accrual) error {
 	_, err := db.db.Exec("UPDATE orders(status, bonus)"+" VALUES($1,$2) WHERE order_id = $3", data.Status, data.Accrual, data.Order)
 	if err != nil {
-		log.Println("бд решила что может творить хуйню")
+		log.Println("бд решила что может творить хуйню", err)
+		return err
 	}
+	return nil
 }
 
-func (db *DB) Numorder() []string {
-	rows, err := db.db.Query("SELECT order_id FROM orders WHERE status = 'NEW' OR status = 'INVALID' OR status = 'PROCESSING' OR status = 'REGISTERED'")
+func (db *DB) NumOrder() ([]string, error) {
+	rows, err := db.db.Query("SELECT order_id FROM orders WHERE status = 'NEW' OR status = 'PROCESSING' OR status = 'REGISTERED'")
 	if rows.Err() != nil {
 		log.Println("бд решила что может творить хуйню", err)
-		return nil
+		return nil, err
 	}
 	if err != nil {
 		log.Println("бд решила что может творить хуйню", err)
-		return nil
+		return nil, err
 	}
 	var list []string
 	for rows.Next() {
@@ -219,9 +221,9 @@ func (db *DB) Numorder() []string {
 		err := rows.Scan(&num)
 		if err != nil {
 			log.Println("скан решила что может творить хуйню", err)
-			return nil
+			return nil, err
 		}
 		list = append(list, num)
 	}
-	return list
+	return list, nil
 }
