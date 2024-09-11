@@ -37,10 +37,12 @@ func (st start) Bonus() error {
 			log.Println("запрос кудато не ушел все наебнулось")
 			return err
 		}
+		//лучше использовать константы
 		if resp.StatusCode == 500 || resp.StatusCode == 204 || resp.StatusCode == 429 {
 			return nil
 		}
 
+		defer resp.Body.Close()
 		if err := json.NewDecoder(resp.Body).Decode(&order); err != nil {
 			log.Println("джейсон выебывается")
 			return err
