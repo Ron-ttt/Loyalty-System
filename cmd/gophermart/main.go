@@ -25,7 +25,7 @@ func main() {
 	r.HandleFunc("/api/user/withdrawals", st.Info).Methods(http.MethodGet)
 
 	go func() {
-		ticker := time.Tick(10 * time.Second)
+		ticker := time.Tick(3 * time.Second)
 		for range ticker {
 			err := st.Bonus()
 			if err != nil {
