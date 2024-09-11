@@ -149,6 +149,7 @@ func (db *DB) GetOrderUser(name string) ([]Orders, error) {
 	}
 
 	var listorders []Orders
+	//////errrrr v zaprose pochitay tz accural nado tozhe polychat'
 	rows, err := db.db.Query("SELECT order_id, status, created_at FROM orders WHERE users_id=$1 order by created_at desc", id)
 	if rows.Err() != nil {
 		return nil, err
@@ -183,6 +184,7 @@ func (db *DB) BalanceUser(name string) (Account, error) {
 	var wd float32 = 0
 	var cur float32 = 0
 	for rows.Next() {
+		// y tebya v bd int a ne float
 		var num float32
 		err := rows.Scan(&num)
 		if err != nil {
