@@ -42,8 +42,8 @@ type User struct {
 	Password string `json:"password"`
 }
 type Account struct {
-	Current   int `json:"current"`
-	Withdrawn int `json:"withdrawn"`
+	Current   float32 `json:"current"`
+	Withdrawn float32 `json:"withdrawn"`
 }
 type DB struct {
 	db *sql.DB
@@ -180,10 +180,10 @@ func (db *DB) BalanceUser(name string) (Account, error) {
 	if err != nil {
 		return Account{}, err
 	}
-	wd := 0
-	cur := 0
+	var wd float32 = 0
+	var cur float32 = 0
 	for rows.Next() {
-		var num int
+		var num float32
 		err := rows.Scan(&num)
 		if err != nil {
 			return Account{}, err
@@ -193,7 +193,7 @@ func (db *DB) BalanceUser(name string) (Account, error) {
 		}
 		cur = cur + num
 	}
-	return Account{Current: cur, Withdrawn: wd}, nil
+	return Account{Current: cur / 100, Withdrawn: wd / 100}, nil
 }
 
 func (db *DB) UpdateOrderData(data Accrual) error {
