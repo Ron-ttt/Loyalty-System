@@ -115,6 +115,10 @@ func (st start) UpOrder(res http.ResponseWriter, req *http.Request) {
 		res.WriteHeader(http.StatusUnprocessableEntity)
 		return
 	}
+	if !checkLuhn(string(numorderbyte)) {
+		res.WriteHeader(http.StatusUnprocessableEntity)
+		return
+	}
 	err = st.database.UpOrderUser(name.Value, numorder)
 	if err != nil {
 		if errors.Is(err, db.ErrDuplicateOrder) {
@@ -130,6 +134,27 @@ func (st start) UpOrder(res http.ResponseWriter, req *http.Request) {
 	}
 	res.WriteHeader(http.StatusAccepted)
 
+}
+
+func checkLuhn(number string) bool {
+	sum := 0
+	alt := false
+	// Итерируемся по цифрам числа с конца к началу
+	for i := len(number) - 1; i >= 0; i-- {
+		digit, err := strconv.Atoi(string(number[i]))
+		if err != nil {
+			return false // Возврат false в случае недопустимого символа
+		}
+		if alt {
+			digit *= 2
+			if digit > 9 {
+				digit -= 9
+			}
+		}
+		sum += digit
+		alt = !alt // Меняем флаг альтернативной обработки
+	}
+	return sum%10 == 0 // Проверяем, делится ли сумма на 10
 }
 
 // получение списка загруженных пользователем номеров заказов,
