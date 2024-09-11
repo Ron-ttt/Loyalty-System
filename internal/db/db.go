@@ -204,7 +204,7 @@ func (db *DB) Updateorderdata(data Accrual) {
 }
 
 func (db *DB) Numorder() []string {
-	rows, err := db.db.Query("SELECT order_id FROM orders WHERE status = 'NEW' OR status = 'INVALID' OR status = ''PROCESSING' OR status = 'REGISTERED'")
+	rows, err := db.db.Query("SELECT order_id FROM orders WHERE status = 'NEW' OR status = 'INVALID' OR status = 'PROCESSING' OR status = 'REGISTERED'")
 	if rows.Err() != nil {
 		log.Println("бд решила что может творить хуйню")
 		return nil
