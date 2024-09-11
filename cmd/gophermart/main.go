@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
+	"time"
 	"x2/internal/config"
 	"x2/internal/handlers"
 	"x2/internal/middleware"
@@ -26,6 +28,12 @@ func main() {
 	log.Fatal(http.ListenAndServe(config.GetServerAddress(), r))
 	//панику лучше ну вызывать
 	go func() {
-		st.Bonus()
+		ticker := time.Tick(10 * time.Second)
+		for range ticker {
+			err := st.Bonus()
+			if err != nil {
+				fmt.Println(err)
+			}
+		}
 	}()
 }

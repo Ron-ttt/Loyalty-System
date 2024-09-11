@@ -8,7 +8,6 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-	"time"
 	"x2/internal/config"
 	"x2/internal/db"
 	"x2/internal/middleware"
@@ -25,23 +24,23 @@ func Init() start {
 	}
 	return start{URL: cfg.ServerAddress, addressBonus: *cfg.AccrualAddress, database: db}
 }
-func (st start) Bonus() {
-	ticker := time.Tick(60 * time.Second)
-	for range ticker {
-		var order db.Accrual
-		list := st.database.Numorder()
-		for _, num := range list {
-			address := st.addressBonus + "/api/orders/" + num
-			resp, err := http.Get(address)
-			if err != nil {
-				log.Println("запрос кудато не ушел все наебнулось")
-			}
-			if err := json.NewDecoder(resp.Body).Decode(&order); err != nil {
-				log.Println("джейсон выебывается")
-			}
-			st.database.Updateorderdata(order)
+func (st start) Bonus() error {
+	var order db.Accrual
+	list := st.database.Numorder()
+	for _, num := range list {
+		address := st.addressBonus + "/api/orders/" + num
+		resp, err := http.Get(address)
+		if err != nil {
+			log.Println("запрос кудато не ушел все наебнулось")
+			return err
 		}
+		if err := json.NewDecoder(resp.Body).Decode(&order); err != nil {
+			log.Println("джейсон выебывается")
+			return err
+		}
+		st.database.Updateorderdata(order)
 	}
+	return nil
 }
 
 type start struct {

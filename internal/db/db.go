@@ -206,11 +206,11 @@ func (db *DB) Updateorderdata(data Accrual) {
 func (db *DB) Numorder() []string {
 	rows, err := db.db.Query("SELECT order_id FROM orders WHERE status = 'NEW' OR status = 'INVALID' OR status = 'PROCESSING' OR status = 'REGISTERED'")
 	if rows.Err() != nil {
-		log.Println("бд решила что может творить хуйню")
+		log.Println("бд решила что может творить хуйню", err)
 		return nil
 	}
 	if err != nil {
-		log.Println("бд решила что может творить хуйню")
+		log.Println("бд решила что может творить хуйню", err)
 		return nil
 	}
 	var list []string
@@ -218,7 +218,7 @@ func (db *DB) Numorder() []string {
 		var num string
 		err := rows.Scan(&num)
 		if err != nil {
-			log.Println("скан решила что может творить хуйню")
+			log.Println("скан решила что может творить хуйню", err)
 			return nil
 		}
 		list = append(list, num)
