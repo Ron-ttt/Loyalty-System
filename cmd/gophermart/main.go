@@ -24,9 +24,6 @@ func main() {
 	r.HandleFunc("/api/user/balance/withdraw", st.LossBonus).Methods(http.MethodPost)
 	r.HandleFunc("/api/user/withdrawals", st.Info).Methods(http.MethodGet)
 
-	log.Println("server is running")
-	log.Fatal(http.ListenAndServe(config.GetServerAddress(), r))
-	//панику лучше ну вызывать
 	go func() {
 		ticker := time.Tick(10 * time.Second)
 		for range ticker {
@@ -36,4 +33,9 @@ func main() {
 			}
 		}
 	}()
+
+	log.Println("server is running")
+	log.Fatal(http.ListenAndServe(config.GetServerAddress(), r))
+	//панику лучше ну вызывать
+
 }
