@@ -263,4 +263,18 @@ func (st start) Info(res http.ResponseWriter, req *http.Request) {
 		http.Error(res, "пользователь не авторизован", http.StatusUnauthorized)
 		return
 	}
+	var info []db.LossInfo
+	info, err := st.database.Info(name.Value)
+	if err != nil {
+		if errors.Is(err, db.ErrNoOrders) {
+			http.Error(res, err.Error(), http.StatusNoContent)
+			return
+		}
+	}
+	res.Header().Set("content-type", "application/json")
+	if err := json.NewEncoder(res).Encode(info); err != nil {
+		http.Error(res, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	res.WriteHeader(http.StatusOK)
 }

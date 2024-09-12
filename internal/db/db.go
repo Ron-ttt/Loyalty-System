@@ -25,6 +25,7 @@ type Storage interface {
 	UpdateOrderData(data Accrual) error
 	NumOrder() ([]string, error)
 	Reduction(loss Loss, name string) error
+	Info(name string) ([]LossInfo, error)
 }
 type Accrual struct {
 	Order   string  `json:"order"`
@@ -49,6 +50,12 @@ type Account struct {
 type Loss struct {
 	Order string  `json:"order"`
 	Sum   float32 `json:"sum"`
+}
+type LossInfo struct {
+	Order   string    `json:"order"`
+	Sum     float32   `json:"sum"`
+	Time    time.Time `json:"-"`
+	TimeRfc string    `json:"processed_at"`
 }
 
 type DB struct {
@@ -281,4 +288,37 @@ func (db *DB) Reduction(loss Loss, name string) error {
 		return err
 	}
 	return nil
+}
+
+func (db *DB) Info(name string) ([]LossInfo, error) {
+
+	row := db.db.QueryRow("SELECT id FROM users WHERE login = $1", name)
+	var id int
+	err := row.Scan(&id)
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := db.db.Query("SELECT order_id, bonus, created_at FROM orders WHERE users_id=$1 AND bonus<0 order by created_at desc", id)
+	if rows.Err() != nil {
+		return nil, err
+	}
+	if err != nil {
+		return nil, err
+	}
+	if rows == nil {
+		return nil, ErrNoOrders
+	}
+	var listorders []LossInfo
+	for rows.Next() {
+		var order LossInfo
+		err := rows.Scan(&order.Order, &order.Sum, &order.Time)
+		if err != nil {
+			return nil, err
+		}
+		order.Sum = order.Sum / 100 * (-1)
+		order.TimeRfc = order.Time.Format(time.RFC3339)
+		listorders = append(listorders, order)
+	}
+	return listorders, nil
 }
