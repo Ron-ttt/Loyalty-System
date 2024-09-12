@@ -29,6 +29,7 @@ func main() {
 		for range ticker {
 			err := st.Bonus()
 			if err != nil {
+				//правильно логировать ошибки
 				fmt.Println(err)
 			}
 		}

@@ -37,9 +37,10 @@ func NewConfig() Cfg {
 	if accrualEnv != "" {
 		config.AccrualAddress = &accrualEnv
 	}
-	// if *config.DBAddress == "" || *config.AccrualAddress == "" || config.ServerAddress == "" {
-	//panic("invalid config")
-	// }
+
+	if *config.DBAddress == "" || *config.AccrualAddress == "" || config.ServerAddress == "" {
+		panic("invalid config")
+	}
 	return config
 }
 func GetServerAddress() string {
