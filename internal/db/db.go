@@ -24,6 +24,7 @@ type Storage interface {
 	BalanceUser(name string) (Account, error)
 	UpdateOrderData(data Accrual) error
 	NumOrder() ([]string, error)
+	Reduction(loss Loss, name string) error
 }
 type Accrual struct {
 	Order   string  `json:"order"`
@@ -45,6 +46,11 @@ type Account struct {
 	Current   float32 `json:"current"`
 	Withdrawn float32 `json:"withdrawn"`
 }
+type Loss struct {
+	Order string  `json:"order"`
+	Sum   float32 `json:"sum"`
+}
+
 type DB struct {
 	db *sql.DB
 }
@@ -55,6 +61,7 @@ var (
 	ErrDuplicateOrder     = errors.New("order belongs to another user")
 	ErrAlreadyUpload      = errors.New("order upload before")
 	ErrNoOrders           = errors.New("order no upload")
+	ErrNotEnoughBonuses   = errors.New("not enough bonuses on account")
 )
 
 func NewDataBase(dbname string) (Storage, error) {
@@ -149,7 +156,6 @@ func (db *DB) GetOrderUser(name string) ([]Orders, error) {
 	}
 
 	var listorders []Orders
-	//////errrrr v zaprose pochitay tz accural nado tozhe polychat'
 	rows, err := db.db.Query("SELECT order_id, status, bonus, created_at FROM orders WHERE users_id=$1 order by created_at desc", id)
 	if rows.Err() != nil {
 		return nil, err
@@ -184,7 +190,6 @@ func (db *DB) BalanceUser(name string) (Account, error) {
 	var wd float32 = 0
 	var cur float32 = 0
 	for rows.Next() {
-		// y tebya v bd int a ne float
 		var num float32
 		err := rows.Scan(&num)
 		if err != nil {
@@ -228,4 +233,52 @@ func (db *DB) NumOrder() ([]string, error) {
 		list = append(list, num)
 	}
 	return list, nil
+}
+
+func (db *DB) Reduction(loss Loss, name string) error {
+	rows, err := db.db.Query("SELECT bonus FROM orders WHERE users_id=(SELECT id FROM users WHERE login = $1)", name)
+	if rows.Err() != nil {
+		return err
+	}
+	if err != nil {
+		return err
+	}
+	var cur float32 = 0
+	for rows.Next() {
+		var num float32
+		err := rows.Scan(&num)
+		if err != nil {
+			return err
+		}
+		cur = cur + num
+	}
+	if cur-loss.Sum < 0 {
+		return ErrNotEnoughBonuses
+	}
+
+	row := db.db.QueryRow("SELECT id FROM users WHERE login = $1", name)
+	var id int
+	err1 := row.Scan(&id)
+	if err1 != nil {
+		return err1
+	}
+	_, err = db.db.Exec("INSERT INTO orders(users_id, order_id, status, bonus)"+" VALUES($1,$2, 'PROCESSED', $3)", id, loss.Order, loss.Sum*(-1))
+	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok {
+			if pqErr.Code == "23505" {
+				rows := db.db.QueryRow("SELECT users_id FROM orders WHERE order_id = $1", loss.Order)
+				var id2 int
+				err1 := rows.Scan(&id2)
+				if err1 != nil {
+					return err1
+				}
+				if id == id2 {
+					return ErrAlreadyUpload
+				}
+				return ErrDuplicateOrder
+			}
+		}
+		return err
+	}
+	return nil
 }

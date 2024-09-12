@@ -71,15 +71,15 @@ func (st start) Register(res http.ResponseWriter, req *http.Request) {
 	err := st.database.RegisterUser(user)
 	if err != nil {
 		if errors.Is(err, db.ErrDuplicateUser) {
-			res.WriteHeader(http.StatusConflict)
+			http.Error(res, err.Error(), http.StatusConflict)
 			return
 		}
-		res.WriteHeader(http.StatusInternalServerError)
+		http.Error(res, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	err = middleware.NewCookie(res, user.Login)
 	if err != nil {
-		res.WriteHeader(http.StatusInternalServerError)
+		http.Error(res, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	res.WriteHeader(http.StatusOK)
@@ -95,15 +95,15 @@ func (st start) Login(res http.ResponseWriter, req *http.Request) {
 	err := st.database.LoginUser(user)
 	if err != nil {
 		if errors.Is(err, db.ErrInvalidCredentials) {
-			res.WriteHeader(http.StatusUnauthorized)
+			http.Error(res, "пользователь не авторизован", http.StatusUnauthorized)
 			return
 		}
-		res.WriteHeader(http.StatusInternalServerError)
+		http.Error(res, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	err = middleware.NewCookie(res, user.Login)
 	if err != nil {
-		res.WriteHeader(http.StatusInternalServerError)
+		http.Error(res, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	res.WriteHeader(http.StatusOK)
@@ -113,7 +113,7 @@ func (st start) Login(res http.ResponseWriter, req *http.Request) {
 func (st start) UpOrder(res http.ResponseWriter, req *http.Request) {
 	name := req.Context().Value(middleware.ContextKey("Name")).(middleware.ToHand)
 	if !name.IsAuth {
-		res.WriteHeader(http.StatusUnauthorized)
+		http.Error(res, "пользователь не авторизован", http.StatusUnauthorized)
 		return
 	}
 	numorderbyte, err := io.ReadAll(req.Body)
@@ -123,24 +123,24 @@ func (st start) UpOrder(res http.ResponseWriter, req *http.Request) {
 	}
 	numorder, err1 := strconv.Atoi(string(numorderbyte))
 	if err1 != nil {
-		res.WriteHeader(http.StatusUnprocessableEntity)
+		http.Error(res, err1.Error(), http.StatusUnprocessableEntity)
 		return
 	}
 	if !checkLuhn(string(numorderbyte)) {
-		res.WriteHeader(http.StatusUnprocessableEntity)
+		http.Error(res, "неверный номер заказа", http.StatusUnprocessableEntity)
 		return
 	}
 	err = st.database.UpOrderUser(name.Value, numorder)
 	if err != nil {
 		if errors.Is(err, db.ErrDuplicateOrder) {
-			res.WriteHeader(http.StatusConflict)
+			http.Error(res, err.Error(), http.StatusConflict)
 			return
 		}
 		if errors.Is(err, db.ErrAlreadyUpload) {
 			res.WriteHeader(http.StatusOK)
 			return
 		}
-		res.WriteHeader(http.StatusInternalServerError)
+		http.Error(res, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	res.WriteHeader(http.StatusAccepted)
@@ -173,7 +173,7 @@ func checkLuhn(number string) bool {
 func (st start) GetOrder(res http.ResponseWriter, req *http.Request) {
 	name := req.Context().Value(middleware.ContextKey("Name")).(middleware.ToHand)
 	if !name.IsAuth {
-		res.WriteHeader(http.StatusUnauthorized)
+		http.Error(res, "пользователь не авторизован", http.StatusUnauthorized)
 		return
 	}
 	orders, err := st.database.GetOrderUser(name.Value)
@@ -182,7 +182,7 @@ func (st start) GetOrder(res http.ResponseWriter, req *http.Request) {
 			http.Error(res, err.Error(), http.StatusNoContent)
 			return
 		}
-		res.WriteHeader(http.StatusInternalServerError)
+		http.Error(res, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	res.Header().Set("content-type", "application/json")
@@ -197,7 +197,7 @@ func (st start) GetOrder(res http.ResponseWriter, req *http.Request) {
 func (st start) Balance(res http.ResponseWriter, req *http.Request) {
 	name := req.Context().Value(middleware.ContextKey("Name")).(middleware.ToHand)
 	if !name.IsAuth {
-		res.WriteHeader(http.StatusUnauthorized)
+		http.Error(res, "пользователь не авторизован", http.StatusUnauthorized)
 		return
 	}
 	var bonus db.Account
@@ -218,16 +218,49 @@ func (st start) Balance(res http.ResponseWriter, req *http.Request) {
 func (st start) LossBonus(res http.ResponseWriter, req *http.Request) {
 	name := req.Context().Value(middleware.ContextKey("Name")).(middleware.ToHand)
 	if !name.IsAuth {
-		res.WriteHeader(http.StatusUnauthorized)
+		http.Error(res, "пользователь не авторизован", http.StatusUnauthorized)
 		return
 	}
+	var loss db.Loss
+	if err := json.NewDecoder(req.Body).Decode(&loss); err != nil {
+		http.Error(res, err.Error(), http.StatusBadRequest)
+		return
+	}
+	_, err1 := strconv.Atoi(loss.Order)
+	if err1 != nil {
+		http.Error(res, err1.Error(), http.StatusUnprocessableEntity)
+		return
+	}
+	if !checkLuhn(loss.Order) {
+		http.Error(res, "неверный номер заказа", http.StatusUnprocessableEntity)
+		return
+	}
+	err := st.database.Reduction(loss, name.Value)
+	if err != nil {
+		if errors.Is(err, db.ErrNotEnoughBonuses) {
+			http.Error(res, err.Error(), http.StatusPaymentRequired)
+			return
+		}
+		if errors.Is(err, db.ErrDuplicateOrder) {
+			http.Error(res, err.Error(), http.StatusConflict)
+			return
+		}
+		if errors.Is(err, db.ErrAlreadyUpload) {
+			res.WriteHeader(http.StatusOK)
+			return
+		}
+		http.Error(res, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	res.WriteHeader(http.StatusOK)
+
 }
 
 // получение информации о выводе средств с накопительного счёта пользователем
 func (st start) Info(res http.ResponseWriter, req *http.Request) {
 	name := req.Context().Value(middleware.ContextKey("Name")).(middleware.ToHand)
 	if !name.IsAuth {
-		res.WriteHeader(http.StatusUnauthorized)
+		http.Error(res, "пользователь не авторизован", http.StatusUnauthorized)
 		return
 	}
 }
