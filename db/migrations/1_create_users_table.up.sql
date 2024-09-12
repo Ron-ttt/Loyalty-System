@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS users(
 CREATE TABLE IF NOT EXISTS orders(
     id serial primary key,
     users_id integer REFERENCES users(id), 
-    order_id integer UNIQUE not null, 
+    order_id bigint UNIQUE not null, 
     status status_enum DEFAULT 'NEW',
     bonus integer default 0, 
     created_at TIMESTAMP default now());
