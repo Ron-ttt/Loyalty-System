@@ -166,7 +166,7 @@ func (db *DB) GetOrderUser(name string) ([]Orders, error) {
 		if err != nil {
 			return nil, err
 		}
-
+		order.Accrual = order.Accrual / 100
 		order.TimeRfc = order.Time.Format(time.RFC3339)
 		listorders = append(listorders, order)
 	}
