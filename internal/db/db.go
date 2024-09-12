@@ -252,7 +252,7 @@ func (db *DB) Reduction(loss Loss, name string) error {
 		}
 		cur = cur + num
 	}
-	if cur-loss.Sum < 0 {
+	if (cur/100)-loss.Sum < 0 {
 		return ErrNotEnoughBonuses
 	}
 
@@ -262,7 +262,7 @@ func (db *DB) Reduction(loss Loss, name string) error {
 	if err1 != nil {
 		return err1
 	}
-	_, err = db.db.Exec("INSERT INTO orders(users_id, order_id, status, bonus)"+" VALUES($1,$2, 'PROCESSED', $3)", id, loss.Order, loss.Sum*(-1))
+	_, err = db.db.Exec("INSERT INTO orders(users_id, order_id, status, bonus)"+" VALUES($1,$2, 'PROCESSED', $3)", id, loss.Order, loss.Sum*(-100))
 	if err != nil {
 		if pqErr, ok := err.(*pq.Error); ok {
 			if pqErr.Code == "23505" {
