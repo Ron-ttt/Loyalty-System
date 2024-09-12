@@ -150,7 +150,7 @@ func (db *DB) GetOrderUser(name string) ([]Orders, error) {
 
 	var listorders []Orders
 	//////errrrr v zaprose pochitay tz accural nado tozhe polychat'
-	rows, err := db.db.Query("SELECT order_id, status, created_at FROM orders WHERE users_id=$1 order by created_at desc", id)
+	rows, err := db.db.Query("SELECT order_id, status, bonus, created_at FROM orders WHERE users_id=$1 order by created_at desc", id)
 	if rows.Err() != nil {
 		return nil, err
 	}
@@ -162,7 +162,7 @@ func (db *DB) GetOrderUser(name string) ([]Orders, error) {
 	}
 	for rows.Next() {
 		var order Orders
-		err := rows.Scan(&order.Number, &order.Status, &order.Time)
+		err := rows.Scan(&order.Number, &order.Status, &order.Accrual, &order.Time)
 		if err != nil {
 			return nil, err
 		}
