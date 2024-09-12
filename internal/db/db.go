@@ -33,7 +33,7 @@ type Accrual struct {
 type Orders struct {
 	Number  string    `json:"number"`
 	Status  string    `json:"status"`
-	Accrual int       `json:"accrual"`
+	Accrual float32   `json:"accrual"`
 	Time    time.Time `json:"-"`
 	TimeRfc string    `json:"uploaded_at"`
 }
